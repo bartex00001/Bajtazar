@@ -1,49 +1,80 @@
 #include <iostream>
+#include <vector>
 #include <map>
+#include <stdio.h>
+#include <bits/stdc++.h>
 
 std::map<int, std::pair<int, int> > przedzial;
-std::string smak;
+std::vector<bool> smak;
 
-//rekurencyjna kalkulacja wyników O(k)
-void Spamientaj(int l, int r, int k)
+//iteracja zmniejszajac lizkak O(k)
+// jezeli k >= 3 to morzemy wyznaczyc przedzial o k - 2
+void Zmniejsz(int l, int r, int k)
 {
-    przedzial[k] = { l + 1, r + 1 };
-    //std::cout << k << "\n";
-
-    if (k >= 3)
+    while(true)
     {
-        if (smak[l] == 'T')  Spamientaj(l + 1, r, k - 2);
-        else if (smak[r] == 'T') Spamientaj(l, r - 1, k - 2);
-        else  Spamientaj(l + 1, r - 1, k - 2);
+        przedzial[k] = { l + 1, r + 1};
+        if(k < 3)
+            break;
+            
+        if (smak[l])  
+        {
+            l++;
+            k -= 2;
+        }
+        else if (smak[r]) 
+        {
+            r--;
+            k -= 2;
+        }
+        else
+        {
+            l++;
+            r--;
+            k -= 2;
+        }
     }
 }
 
 int main()
 {
+    std::ios_base::sync_with_stdio(false);
+    std::cin.tie(NULL);
     std::pair<int, int> nil = { 0, 0 };//{-2, -2};
     int n, m, suma = 0, l, r, k;
-    std::cin >> n >> m >> smak;
+    std::cin >> n >> m;
+    char v;
 
-
-    //oblicz sumê  O(n)
     for (int a = 0; a < n; a++)
     {
-        if (smak[a] == 'W')  suma += 1;
-        else  suma += 2;
+        std::cin >> v;
+
+        if (v == 'W')
+            smak.push_back(false);
+        else
+            smak.push_back(true);
     }
 
-    ////wype³nij mapê nil O(n)
+
+    //oblicz sumÄ™  O(n)
+    for (int a = 0; a < n; a++)
+    {
+        if (smak[a])  suma += 2;
+        else  suma += 1;
+    }
+
+    ////wypeÅ‚nij mapÄ™ nil O(n)
     //for (int a = 0; a <= suma; a++)
     //    przedzial[a] = nil;
 
     //dla pierwszej parzystosci
-    Spamientaj(0, n - 1, suma);
+    Zmniejsz(0, n - 1, suma);
     l = -1; r = -1;
     
     //znajdz jedynki O(n)
     for (int a = 0; a < n; a++)
     {
-        if (smak[a] == 'W') 
+        if (!smak[a]) 
         {
             if(l == -1)
                 l = a;
@@ -56,21 +87,22 @@ int main()
     if (r != -1)
     {
         if (n - (r + 1) <= l)
-            Spamientaj(0, r - 1, suma - 2 * (n - (r + 1)) - 1);
+            Zmniejsz(0, r - 1, suma - 2 * (n - (r + 1)) - 1);
         else
-            Spamientaj(l + 1, n - 1, suma - 2 * (l)-1);
+            Zmniejsz(l + 1, n - 1, suma - 2 * (l)-1);
     }
 
     //wypisz wyniki O(m)
     for (int a = 0; a < m; a++)
     {
         std::cin >> k;
+        
         if (k > suma)
-            std::cout << "NIE\n";
+            printf("%s", "NIE\n");
         else if (przedzial[k] == nil && k >= 3)
-            std::cout << "NIE\n";
-        else  
-            std::cout << przedzial[k].first << " " << przedzial[k].second << "\n";
+            printf("%s", "NIE\n");
+        else
+            printf("%i%s%i%s", przedzial[k].first, " ", przedzial[k].second, "\n");
     }
     /*
     for (int a = 1; a <= suma; a++)
